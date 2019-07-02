@@ -1,12 +1,14 @@
 ﻿using Microsoft.Web.Http;
 using Microsoft.Web.Http.Routing;
 using Microsoft.Web.Http.Versioning;
+using Microsoft.Web.Http.Versioning.Conventions;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using TheCodeCamp.Controllers;
 
 namespace TheCodeCamp
 {
@@ -27,6 +29,13 @@ namespace TheCodeCamp
                 //    new HeaderApiVersionReader("X-Version"),
                 //    new QueryStringApiVersionReader("ver")
                 //    );
+
+                cfg.Conventions.Controller<TalksController>()   //<= This style of convension allows you to enable versioning from centralized place 
+                    .HasApiVersion(1, 0)                        //rather than attributes
+                    .HasApiVersion(1, 1)
+                    .Action(m => m.Get(default(string), default(int), default(bool)))
+                        .MapToApiVersion(2, 0);
+
             });
 
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver =
