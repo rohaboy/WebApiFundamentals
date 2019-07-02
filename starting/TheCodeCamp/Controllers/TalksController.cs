@@ -109,6 +109,13 @@ namespace TheCodeCamp.Controllers
 
                     _mapper.Map(model, talk);
 
+                    if (talk.Speaker.SpeakerId != model.Speaker.SpeakerId)
+                    {
+                        var speaker = await _repository.GetSpeakerAsync(model.Speaker.SpeakerId);
+                        if (speaker != null) talk.Speaker = speaker;
+                    }
+
+
                     if(await _repository.SaveChangesAsync())
                     {
                         return Ok(_mapper.Map<TalkModel>(talk));
@@ -124,6 +131,31 @@ namespace TheCodeCamp.Controllers
             catch (Exception ex)
             {
 
+                return InternalServerError(ex);
+            }
+        }
+
+        [Route("{talkId:int}")]
+        public async Task<IHttpActionResult> Delete(string moniker,int talkId)
+        {
+            try
+            {
+                var talk = await _repository.GetTalkByMonikerAsync(moniker, talkId);
+                if (talk == null) return NotFound();
+
+                _repository.DeleteTalk(talk);
+
+                if (await _repository.SaveChangesAsync())
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return InternalServerError();
+                }
+            }
+            catch(Exception ex)
+            {
                 return InternalServerError(ex);
             }
         }
